@@ -8,6 +8,14 @@ const Userschema = new mongoose.Schema({
         minlength: 3,
         maxlength: 100
     },
+    Country:{
+        type: String,
+        required: true,
+    },
+    City:{
+        type: String,
+        required: true,
+    },
     email: {
         type: String,
         trim: true,
@@ -65,6 +73,8 @@ const validatregister = (obj) => {
     const schema = joi.object({
 
         username: joi.string().trim().min(3).max(100).required(),
+        Country:joi.string().required(),
+        City:joi.string().required(),
         email: joi.string().trim().min(3).max(150).required().email(),
         password: joi.string().trim().min(6).required(),
         Gender:joi.string().required()

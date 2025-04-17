@@ -33,8 +33,8 @@ router.get('/profile/:id', asynchandler(async (req, res) => {
     }
 }))
 router.post('/register', asynchandler(async (req, res) => {
-    const { username, email, password, Gender } = req.body;
-    // const activcode=generateactivecode();
+    const { username, email, password, Gender,City,Country } = req.body;
+    const activcode=generateactivecode();
     const { error } = validatregister(req.body);
     if (error) {
         res.status(400).json({ message: error.details[0].message })
@@ -49,24 +49,35 @@ router.post('/register', asynchandler(async (req, res) => {
         username,
         email,
         password: hashpassword,
-        Gender
+        Gender,
+        Country,
+        City
     })
     const token = jwt.sign({ id: newuser._id, isAdmin: newuser.isAdmin }, process.env.JWT_KEY)
     newuser.token = token;
     newuser.save();
-    // const transporter=nodemailer.createTransport({
-    //     service:'gmail',
-    //     auth:{
-    //         user:
-    //         password:
-    //     }
-    // })
-    // const mailoptions={
-    //     from:,
-    //     to:newuser.email,
-    //     subject:"hello active your account",
-    //     text:`hello ${username}, this is your activation code ${activcode}`
-    // }
+    const transporter=nodemailer.createTransport({
+        service:'gmail',
+        auth:{
+            user: process.env.USER_EMAIL,
+            password: "omar0994051940"
+        }
+    })
+    const mailoptions={
+        from: process.env.USER_EMAIL,
+        to: "apo.zouher@gmail.com" ,
+        subject:"hello active your account",
+        text:`hello ${username}, this is your activation code ${activcode}`
+    }
+    transporter.sendMail(mailoptions,(error,success)=>{
+        if(error){
+            console.log(error);
+            
+        }else{
+            console.log(success.response);
+            
+        }
+    })
     res.status(201).json({ status: "success", user: newuser });
 }))
 
