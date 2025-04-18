@@ -11,10 +11,10 @@ const path = require('path');
 const { RemoveImage, UploadImage, RemoveImagemany } = require('../utils/cloudinary');
 const { Post } = require('../models/Post');
 const { Comment } = require('../models/Comment');
-const nodemailer=require('nodemailer');
+const nodemailer = require('nodemailer');
 
-const generateactivecode=()=>{
-    return Math.floor(100000 + Math.random()*900000)
+const generateactivecode = () => {
+    return Math.floor(100000 + Math.random() * 900000)
 }
 router.get('/profile', verifytokenandisAdmin, asynchandler(async (req, res) => {
     // console.log(req.headers.authorization);
@@ -33,8 +33,8 @@ router.get('/profile/:id', asynchandler(async (req, res) => {
     }
 }))
 router.post('/register', asynchandler(async (req, res) => {
-    const { username, email, password, Gender,City,Country,birthdate } = req.body;
-    const activcode=generateactivecode();
+    const { username, email, password, Gender, City, Country, birthdate } = req.body;
+    const activcode = generateactivecode();
     const { error } = validatregister(req.body);
     if (error) {
         res.status(400).json({ message: error.details[0].message })
@@ -57,26 +57,29 @@ router.post('/register', asynchandler(async (req, res) => {
     const token = jwt.sign({ id: newuser._id, isAdmin: newuser.isAdmin }, process.env.JWT_KEY)
     newuser.token = token;
     newuser.save();
-    const transporter=nodemailer.createTransport({
-        service:'gmail',
-        auth:{
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
             user: process.env.USER_EMAIL,
-            password: "omar0994051940"
+            password: process.env.USER_PASS
+        },
+        tls: {
+            rejectUnauthorized: false // يتيح التشفير دون رفض الشهادات غير الموثوقة
         }
     })
-    const mailoptions={
+    const mailoptions = {
         from: process.env.USER_EMAIL,
-        to: "apo.zouher@gmail.com" ,
-        subject:"hello active your account",
-        text:`hello ${username}, this is your activation code ${activcode}`
+        to: newuser.email,
+        subject: "hello active your account",
+        text: `hello ${username}, this is your activation code ${activcode}`
     }
-    transporter.sendMail(mailoptions,(error,success)=>{
-        if(error){
+    transporter.sendMail(mailoptions, (error, success) => {
+        if (error) {
             console.log(error);
-            
-        }else{
+
+        } else {
             console.log(success.response);
-            
+
         }
     })
     res.status(201).json({ status: "success", user: newuser });
@@ -120,7 +123,7 @@ router.patch('/profile/:id', verifytokenandonlyuser, asynchandler(async (req, re
         const updateuser = await User.findByIdAndUpdate({ _id: req.params.id }, {
             $set: {
                 username: req.body.username,
-                birthdate:req.body.birthdate,
+                birthdate: req.body.birthdate,
                 password: req.body.password,
                 bio: req.body.bio,
                 Gender: req.body.Gender
