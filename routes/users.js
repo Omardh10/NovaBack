@@ -33,7 +33,7 @@ router.get('/profile/:id', asynchandler(async (req, res) => {
     }
 }))
 router.post('/register', asynchandler(async (req, res) => {
-    const { username, email, password, Gender,City,Country } = req.body;
+    const { username, email, password, Gender,City,Country,birthdate } = req.body;
     const activcode=generateactivecode();
     const { error } = validatregister(req.body);
     if (error) {
@@ -51,7 +51,8 @@ router.post('/register', asynchandler(async (req, res) => {
         password: hashpassword,
         Gender,
         Country,
-        City
+        City,
+        birthdate
     })
     const token = jwt.sign({ id: newuser._id, isAdmin: newuser.isAdmin }, process.env.JWT_KEY)
     newuser.token = token;
@@ -119,7 +120,7 @@ router.patch('/profile/:id', verifytokenandonlyuser, asynchandler(async (req, re
         const updateuser = await User.findByIdAndUpdate({ _id: req.params.id }, {
             $set: {
                 username: req.body.username,
-                email: req.body.email,
+                birthdate:req.body.birthdate,
                 password: req.body.password,
                 bio: req.body.bio,
                 Gender: req.body.Gender

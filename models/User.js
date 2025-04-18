@@ -8,11 +8,11 @@ const Userschema = new mongoose.Schema({
         minlength: 3,
         maxlength: 100
     },
-    Country:{
+    Country: {
         type: String,
         required: true,
     },
-    City:{
+    City: {
         type: String,
         required: true,
     },
@@ -33,6 +33,10 @@ const Userschema = new mongoose.Schema({
     bio: {
         type: String
     },
+    birthdate: {
+        type: String,
+        required: true
+    },
     profilephoto: {
         type: Object,
         default: {
@@ -48,13 +52,13 @@ const Userschema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    Gender:{
-        type:String,
-        required:true
+    Gender: {
+        type: String,
+        required: true
     },
-    followers:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'User'
+    followers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }],
     token: {
         type: String
@@ -73,11 +77,12 @@ const validatregister = (obj) => {
     const schema = joi.object({
 
         username: joi.string().trim().min(3).max(100).required(),
-        Country:joi.string().required(),
-        City:joi.string().required(),
+        Country: joi.string().required(),
+        City: joi.string().required(),
         email: joi.string().trim().min(3).max(150).required().email(),
         password: joi.string().trim().min(6).required(),
-        Gender:joi.string().required()
+        Gender: joi.string().required(),
+        birthdate: joi.string().required()
 
     })
     return schema.validate(obj)
@@ -93,10 +98,9 @@ const validatlogin = (obj) => {
 const validatupdateuser = (obj) => {
     const schema = joi.object({
         username: joi.string().trim().min(3).max(100),
-        email: joi.string().trim().min(3).max(150).email(),
         password: joi.string().trim().min(6),
         bio: joi.string(),
-        Gender:joi.string()
+        Gender: joi.string()
     })
     return schema.validate(obj)
 }
