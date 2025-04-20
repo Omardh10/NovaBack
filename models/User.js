@@ -68,6 +68,20 @@ const Userschema = new mongoose.Schema({
             ref: "User"
         }
     ],
+    likeposts:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'User'
+        }
+    ],
+    long:{
+        type:Number,
+        required:true
+    },
+    lat:{
+        type:Number,
+        required:true
+    },
     token: {
         type: String
     }
@@ -90,7 +104,9 @@ const validatregister = (obj) => {
         email: joi.string().trim().min(3).max(150).required().email(),
         password: joi.string().trim().min(6).required(),
         Gender: joi.string().required(),
-        birthdate: joi.string().required()
+        birthdate: joi.string().required(),
+        long: joi.number().required(),
+        lat: joi.number().required()
 
     })
     return schema.validate(obj)

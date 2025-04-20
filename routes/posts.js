@@ -7,6 +7,7 @@ const { UploadImage, RemoveImage } = require('../utils/cloudinary');
 const fs = require('fs');
 const path = require('path');
 const { Comment } = require('../models/Comment');
+const { User } = require('../models/User');
 
 const router = express.Router();
 
@@ -129,6 +130,7 @@ router.patch('/upload-image/:id', verifytoken, uploadphoto.single("image"), asyn
     }
 }))
 router.patch('/like/:id', verifytoken, asynchandler(async (req, res) => {
+    let user = await User.findById(req.user.id);
     let post = await Post.findById(req.params.id);
     if (!post) {
         res.status(404).json({ message: "this post not found" })
@@ -138,10 +140,21 @@ router.patch('/like/:id', verifytoken, asynchandler(async (req, res) => {
         post = await Post.findByIdAndUpdate({ _id: req.params.id }, {
             $pull: { likes: req.user.id }
         }, { new: true })
+        user = await User.findByIdAndUpdate({ _id: req.user.id }, {
+            $pull: {
+                likeposts: post._id
+            }
+        }, { new: true })
     } else {
         post = await Post.findByIdAndUpdate({ _id: req.params.id }, {
             $push: { likes: req.user.id }
-        }, { new: true })
+        }, { new: true }),
+            user = await User.findByIdAndUpdate({ _id: req.user.id }, {
+                $push: {
+                    likeposts: post._id
+                }
+            }, { new: true })
+
     }
     res.status(201).json(post)
 }))

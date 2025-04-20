@@ -33,7 +33,7 @@ router.get('/profile/:id', asynchandler(async (req, res) => {
     }
 }))
 router.post('/register', asynchandler(async (req, res) => {
-    const { username, email, password, Gender, City, Country, birthdate } = req.body;
+    const { username, email, password, Gender, City, Country, birthdate, long, lat } = req.body;
     const activcode = generateactivecode();
     const { error } = validatregister(req.body);
     if (error) {
@@ -55,7 +55,9 @@ router.post('/register', asynchandler(async (req, res) => {
         Gender,
         Country,
         City,
-        birthdate
+        birthdate,
+        long,
+        lat
     })
     const token = jwt.sign({ id: newuser._id, isAdmin: newuser.isAdmin }, process.env.JWT_KEY)
     newuser.token = token;
@@ -237,6 +239,16 @@ router.patch('/follow/:id', verifytoken, asynchandler(async (req, res) => {
         }
     });
 
+}))
+
+router.get('/checkemail', asynchandler(async (req, res) => {
+    const email = req.query.email
+    const olduser = await User.findOne({ email: email })
+    if (olduser) {
+        return res.status(200).json({ message: "user is old user" })
+    } else if (!olduser) {
+        return res.status(200).json({ message: "user allowed" })
+    }
 }))
 
 module.exports = router;
