@@ -22,41 +22,29 @@ router.get('/', asynchandler(async (req, res) => {
     const { pagenumber, category } = req.query;
     let posts;
     if (pagenumber) {
-
-        posts = await Post.find().skip((pagenumber - 1) * post_item).limit(post_item).populate("user", ["-password"])
-
-
+        posts = await Post.find().skip((pagenumber - 1) * post_item).limit(post_item).populate("user", ["-password"]).populate("comments")
         res.status(201).json({ posts });
-
     }
     if (category) {
-        posts = await Post.find({ category }).populate("user", ["-password"]);
+        posts = await Post.find({ category }).populate("user", ["-password"]).populate("comments");
 
         res.status(201).json({ posts });
     }
     else {
-        posts = await Post.find().populate("user", ["-password"]);
+        posts = await Post.find().populate("user", ["-password"]).populate("comments");
         res.status(201).json({ posts });
     }
-
 }))
 
 router.get('/:id', asynchandler(async (req, res) => {
 
     let post;
-
     post = await Post.findById(req.params.id).populate("user", ["-password"]).populate("comments");
-
     if (!post) {
-
         res.status(400).json({ message: "this post not found" })
-
     } else {
-
         res.status(201).json({ post })
-
     }
-
 }))
 
 router.post('/', verifytoken, uploadphoto.single('image'), asynchandler(async (req, res) => {

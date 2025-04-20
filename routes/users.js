@@ -45,6 +45,9 @@ router.post('/register', asynchandler(async (req, res) => {
     }
     const hashpassword = await bcrypt.hash(password, 10)
 
+
+
+
     let newuser = new User({
         username,
         email,
@@ -57,31 +60,31 @@ router.post('/register', asynchandler(async (req, res) => {
     const token = jwt.sign({ id: newuser._id, isAdmin: newuser.isAdmin }, process.env.JWT_KEY)
     newuser.token = token;
     newuser.save();
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.USER_EMAIL,
-            password: process.env.USER_PASS
-        },
-        tls: {
-            rejectUnauthorized: false // يتيح التشفير دون رفض الشهادات غير الموثوقة
-        }
-    })
-    const mailoptions = {
-        from: process.env.USER_EMAIL,
-        to: newuser.email,
-        subject: "hello active your account",
-        text: `hello ${username}, this is your activation code ${activcode}`
-    }
-    transporter.sendMail(mailoptions, (error, success) => {
-        if (error) {
-            console.log(error);
+    // const transporter = nodemailer.createTransport({
+    //     service: 'gmail',
+    //     auth: {
+    //         user: process.env.USER_EMAIL,
+    //         password: process.env.USER_PASS
+    //     },
+    //     tls: {
+    //         rejectUnauthorized: false // يتيح التشفير دون رفض الشهادات غير الموثوقة
+    //     }
+    // })
+    // const mailoptions = {
+    //     from: process.env.USER_EMAIL,
+    //     to: newuser.email,
+    //     subject: "hello active your account",
+    //     text: `hello ${username}, this is your activation code ${activcode}`
+    // }
+    // transporter.sendMail(mailoptions, (error, success) => {
+    //     if (error) {
+    //         console.log(error);
 
-        } else {
-            console.log(success.response);
+    //     } else {
+    //         console.log(success.response);
 
-        }
-    })
+    //     }
+    // })
     res.status(201).json({ status: "success", user: newuser });
 }))
 
@@ -173,27 +176,106 @@ router.post('/profile/profile-photo-upload', verifytoken, uploadphoto.single('im
     res.status(201).json({ message: "image uploaded seccussfully", profilephoto: { url: result.secure_url, publicId: result.public_id } });
     fs.unlinkSync(pathimg);
 }))
+
 router.patch('/follow/:id', verifytoken, asynchandler(async (req, res) => {
-    let user = await User.findById(req.params.id);
-    if (!user) {
-        return res.status(404).json({ message: "user not found" });
+
+    // 1. منع المستخدم من متابعة نفسه
+    if (req.params.id === req.user.id) {
+        return res.status(400).json({ message: "You cannot follow yourself" });
     }
-    isfollow = user.followers.find(user => user.toString() === req.user.id)
-    if (isfollow) {
-        user = await User.findByIdAndUpdate({ _id: req.params.id }, {
-            $pull: {
-                followers: req.user.id
+
+    // 2. جلب بيانات المستخدمين
+    const userToFollow = await User.findById(req.params.id);
+    const currentUser = await User.findById(req.user.id);
+
+    if (!userToFollow || !currentUser) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    // 3. التحقق من حالة المتابعة الحالية
+    const isFollowing = userToFollow.followers.includes(req.user.id);
+    const isFollowedByTarget = currentUser.followers.includes(req.params.id);
+
+    if (isFollowing) {
+        // إلغاء المتابعة
+        await User.findByIdAndUpdate(req.params.id, {
+            $pull: { followers: req.user.id }
+        });
+        await User.findByIdAndUpdate(req.user.id, {
+            $pull: { following: req.params.id }
+        });
+    } else {
+        // متابعة جديدة
+        await User.findByIdAndUpdate(req.params.id, {
+            $addToSet: { followers: req.user.id }
+        });
+        await User.findByIdAndUpdate(req.user.id, {
+            $addToSet: { following: req.params.id }
+        });
+
+        // 4. إذا كان المستخدم الهدف يتابعني، أرد المتابعة تلقائيًا
+        if (isFollowedByTarget) {
+            await User.findByIdAndUpdate(req.params.id, {
+                $addToSet: { following: req.user.id }
+            });
+            await User.findByIdAndUpdate(req.user.id, {
+                $addToSet: { followers: req.params.id }
+            });
+        }
+    }
+
+    // 5. جلب البيانات المحدثة
+    const updatedUserToFollow = await User.findById(req.params.id);
+    const updatedCurrentUser = await User.findById(req.user.id);
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            userToFollow: {
+                followers: updatedUserToFollow.followers,
+                followersCount: updatedUserToFollow.followers.length,
+                following: updatedUserToFollow.following,
+                followingCount: updatedUserToFollow.following.length,
+            },
+            currentUser: {
+                followers: updatedCurrentUser.followers,
+                followersCount: updatedCurrentUser.followers.length,
+                following: updatedCurrentUser.following,
+                followingCount: updatedCurrentUser.following.length,
             }
-        }, { new: true })
-    }
-    else {
-        user = await User.findByIdAndUpdate({ _id: req.params.id }, {
-            $push: {
-                followers: req.user.id
-            }
-        }, { new: true })
-    }
-    res.status(202).json({ status: "success", user })
+            // isFollowing: !isFollowing,
+            // isFollowBack: isFollowedByTarget && !isFollowing // هل تم رد المتابعة؟
+        }
+    });
+
 }))
 
 module.exports = router;
+
+
+
+
+
+
+
+
+// let user = await User.findById(req.params.id);
+// if (!user) {
+//     return res.status(404).json({ message: "user not found" });
+// }
+// isfollow = user.followers.find(user => user.toString() === req.user.id)
+// if (isfollow) {
+//     user = await User.findByIdAndUpdate({ _id: req.params.id }, {
+//         $pull: {
+//             followers: req.user.id
+//         }
+//     }, { new: true })
+// }
+// else {
+//     user = await User.findByIdAndUpdate({ _id: req.params.id }, {
+//         $push: {
+//             followers: req.user.id
+//         }
+//     }, { new: true })
+// }
+// res.status(202).json({ status: "success", user })
