@@ -179,25 +179,19 @@ router.post('/profile/profile-photo-upload', verifytoken, uploadphoto.single('im
 
 router.patch('/follow/:id', verifytoken, asynchandler(async (req, res) => {
 
-    // 1. منع المستخدم من متابعة نفسه
     if (req.params.id === req.user.id) {
         return res.status(400).json({ message: "You cannot follow yourself" });
     }
-
-    // 2. جلب بيانات المستخدمين
     const userToFollow = await User.findById(req.params.id);
     const currentUser = await User.findById(req.user.id);
 
     if (!userToFollow || !currentUser) {
         return res.status(404).json({ message: "User not found" });
     }
-
-    // 3. التحقق من حالة المتابعة الحالية
     const isFollowing = userToFollow.followers.includes(req.user.id);
     const isFollowedByTarget = currentUser.followers.includes(req.params.id);
 
     if (isFollowing) {
-        // إلغاء المتابعة
         await User.findByIdAndUpdate(req.params.id, {
             $pull: { followers: req.user.id }
         });
@@ -205,15 +199,12 @@ router.patch('/follow/:id', verifytoken, asynchandler(async (req, res) => {
             $pull: { following: req.params.id }
         });
     } else {
-        // متابعة جديدة
         await User.findByIdAndUpdate(req.params.id, {
             $addToSet: { followers: req.user.id }
         });
         await User.findByIdAndUpdate(req.user.id, {
             $addToSet: { following: req.params.id }
         });
-
-        // 4. إذا كان المستخدم الهدف يتابعني، أرد المتابعة تلقائيًا
         if (isFollowedByTarget) {
             await User.findByIdAndUpdate(req.params.id, {
                 $addToSet: { following: req.user.id }
@@ -223,8 +214,6 @@ router.patch('/follow/:id', verifytoken, asynchandler(async (req, res) => {
             });
         }
     }
-
-    // 5. جلب البيانات المحدثة
     const updatedUserToFollow = await User.findById(req.params.id);
     const updatedCurrentUser = await User.findById(req.user.id);
 
