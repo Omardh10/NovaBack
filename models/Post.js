@@ -16,11 +16,11 @@ const Postschema = new mongoose.Schema({
         minlength: 3,
         required: true
     },
-    category: {
-        type: String,
-        trim: true,
-        required: true
-    },
+    // category: {
+    //     type: String,
+    //     trim: true,
+    //     required: true
+    // },
     image: {
         type: Object,
         default: {
@@ -54,7 +54,7 @@ const validatcreate = (obj) => {
 
         title: joi.string().trim().min(3).max(200).required(),
         description: joi.string().trim().min(3).required(),
-        category: joi.string().trim().required(),
+        // category: joi.string().trim().required(),
 
     })
     return schema.validate(obj)

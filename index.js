@@ -7,8 +7,9 @@ const dotenv = require('dotenv');
 const commentroutes = require('./routes/comments');
 const userroute = require('./routes/users');
 const categroute = require("./routes/categories");
-const routpasswod=require('./routes/password');
+const routpasswod = require('./routes/password');
 const { ConnectToDb } = require('./utils/db');
+const { server } = require('./socket/socketio');
 
 dotenv.config();
 app.use(express.json());
@@ -23,7 +24,7 @@ app.use('/api/users', userroute)
 app.use('/api/posts', postroute)
 app.use('/api/comments', commentroutes)
 app.use('/api/categories', categroute)
-app.use('/api/password',routpasswod )
+app.use('/api/password', routpasswod)
 
 
 app.use((req, res, next) => {
@@ -36,7 +37,7 @@ app.use((error, req, res, next) => {
     res.status(401).json({ message: error.message });
 })
 
-app.listen(8000, () => {
-    console.log("port 8000");
+server.listen(process.env.PORT || 8000, () => {
+    console.log(`port is ${process.env.PORT}`);
 
 })

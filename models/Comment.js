@@ -20,7 +20,11 @@ const Commentschema = new mongoose.Schema({
     username: {
         type: String,
         required: true
-    }
+    },
+    profilephoto:{
+        type:String,
+        required:true
+    },
 }, { timestamps: true });
 const Comment = mongoose.model("Comment", Commentschema)
 

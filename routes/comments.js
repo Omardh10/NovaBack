@@ -3,6 +3,7 @@ const asynchandler = require('express-async-handler');
 const { verifytoken } = require('../meddlwer/verifyalltoken');
 const { validatcreateComment, Comment, validatupdateComment } = require('../models/Comment');
 const { User } = require('../models/User');
+const { Post } = require('../models/Post');
 const router = express.Router();
 
 router.get('/', asynchandler(async (req, res) => {
@@ -28,9 +29,19 @@ router.post('/', verifytoken, asynchandler(async (req, res) => {
         postId: req.body.postId,
         text: req.body.text,
         user: req.user.id,
-        username: getusername.username
+        username: getusername.username,
+        profilephoto: getusername.profilephoto.url
     })
-    newcomment.save();
+   await newcomment.save();
+   const post = await Post.findById(req.body.postId);
+   if (post.user.toString() !== req.user.id) {
+       sendNotification(post.user.toString(), 'New comment on your post', {
+           postId: post._id,
+           commentId: newcomment._id,
+           userId: req.user.id,
+           type: 'new_comment'
+       });
+   }
     res.status(201).json({ status: "success", newcomment })
 }))
 router.patch('/:id', verifytoken, asynchandler(async (req, res) => {

@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const { Comment } = require('../models/Comment');
 const { User } = require('../models/User');
+const { sendNotification } = require('../socket/socketio');
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.get('/', asynchandler(async (req, res) => {
     const { pagenumber, category } = req.query;
     let posts;
     if (pagenumber) {
-        posts = await Post.find().skip((pagenumber - 1) * post_item).limit(post_item).populate("user", ["-password"]).populate("comments")
+        posts = await Post.find().skip((pagenumber - 1) * post_item).limit(post_item).populate("user", ["-password"]).populate("comments").sort({creadetAt:-1})
         res.status(201).json({ posts });
     }
     if (category) {
@@ -61,7 +62,7 @@ router.post('/', verifytoken, uploadphoto.single('image'), asynchandler(async (r
     const newpost = new Post({
         title: req.body.title,
         description: req.body.description,
-        category: req.body.category,
+        // category: req.body.category,
         user: req.user.id,
         image: {
             url: result.secure_url,
@@ -69,6 +70,16 @@ router.post('/', verifytoken, uploadphoto.single('image'), asynchandler(async (r
         }
     })
     newpost.save();
+    const user = await User.findById(req.user.id);
+    const followers = user.followers; // افترض أن لديك حقل followers في نموذج User
+    
+    followers.forEach(followerId => {
+        sendNotification(followerId, 'New post from user you follow', {
+            postId: newpost._id,
+            userId: req.user.id,
+            type: 'new_post'
+        });
+    });
     res.status(201).json(newpost);
     fs.unlinkSync(pathimg);
 }))
@@ -154,6 +165,14 @@ router.patch('/like/:id', verifytoken, asynchandler(async (req, res) => {
                     likeposts: post._id
                 }
             }, { new: true })
+
+            if (post.user.toString() !== req.user.id) {
+                sendNotification(post.user, 'New like on your post', {
+                    postId: post._id,
+                    userId: req.user.id,
+                    type: 'new_like'
+                });
+            }
 
     }
     res.status(201).json(post)

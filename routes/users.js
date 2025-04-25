@@ -19,12 +19,12 @@ const generateactivecode = () => {
 router.get('/profile', verifytokenandisAdmin, asynchandler(async (req, res) => {
     // console.log(req.headers.authorization);
 
-    const users = await User.find({}, { "__v": false, "password": false }).populate("posts")
+    const users = await User.find({}, { "__v": false, "password": false }).populate("posts");
     res.status(201).json({ status: "success", data: users })
 
 }))
 router.get('/profile/:id', asynchandler(async (req, res) => {
-    const user = await User.findById(req.params.id).select("-password")
+    const user = await User.findById(req.params.id).select("-password").populate("posts");
     if (!user) {
         return res.status(403).json({ message: "user not found" });
     }
