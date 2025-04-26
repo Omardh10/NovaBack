@@ -9,11 +9,12 @@ const userroute = require('./routes/users');
 const categroute = require("./routes/categories");
 const routpasswod = require('./routes/password');
 const { ConnectToDb } = require('./utils/db');
-const { server } = require('./socket/socketio');
-
+const { Server } = require('socket.io');
+const http = require('http');
+const server = http.createServer(app);
+const io = new Server(server);
 dotenv.config();
 app.use(express.json());
-
 ConnectToDb();
 // mongoose.connect("mongodb://localhost/blogDb").then(() => {
 //     console.log("connect to db");
@@ -37,7 +38,7 @@ app.use((error, req, res, next) => {
     res.status(401).json({ message: error.message });
 })
 
-server.listen(process.env.PORT || 8000, () => {
+server.listen(8000, () => {
     console.log(`port is ${process.env.PORT}`);
 
 })
