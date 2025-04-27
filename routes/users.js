@@ -169,33 +169,33 @@ router.patch('/follow/:id', verifytoken, asynchandler(async (req, res) => {
     if (isFollowing) {
         await User.findByIdAndUpdate(req.params.id, {
             $pull: { followers: req.user.id }
-        });
+        },{new:true});
         await User.findByIdAndUpdate(req.user.id, {
             $pull: { following: req.params.id }
-        });
+        },{new:true});
     } else {
         await User.findByIdAndUpdate(req.params.id, {
             $addToSet: { followers: req.user.id }
-        });
+        },{new:true});
         await User.findByIdAndUpdate(req.user.id, {
             $addToSet: { following: req.params.id }
-        });
+        },{new:true});
         if (isFollowedByTarget) {
             await User.findByIdAndUpdate(req.params.id, {
                 $addToSet: { following: req.user.id }
-            });
+            },{new:true});
             await User.findByIdAndUpdate(req.user.id, {
                 $addToSet: { followers: req.params.id }
-            });
+            },{new:true});
         }
     }
     const updatedUserToFollow = await User.findById(req.params.id);
     const updatedCurrentUser = await User.findById(req.user.id);
-     sendNotification(userToFollow, 'you have a new follow', {
-                        userToFollow,
-                        currentUser,
-                        type: 'new_follow'
-                    });
+    //  sendNotification(userToFollow, 'you have a new follow', {
+    //                     userToFollow,
+    //                     currentUser,
+    //                     type: 'new_follow'
+    //                 });
     res.status(200).json({
         status: "success",
         data: {

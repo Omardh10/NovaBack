@@ -14,12 +14,6 @@ const router = express.Router();
 
 
 router.get('/', asynchandler(async (req, res) => {
-    /* const query=req.query;
-    const page=query.page||1;
-    const limit=query.limit||2;
-    const skip=(page-1)*limit;
-    after that i written .skip(skip).limit(limit).populate("user",["-password"]);
-    */
     const post_item = 1;
     const { pagenumber, category } = req.query;
     let posts;

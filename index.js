@@ -58,9 +58,6 @@ io.on('connection', (socket) => {
 
 
 
-
-
-
     socket.on('diconnect', () => {
         console.log('user disconnected');
         delete users[userId]
@@ -68,9 +65,9 @@ io.on('connection', (socket) => {
     })
 })
 
-server.listen(8000, () => {
+server.listen(process.env.PORT || 8000, () => {
     console.log(`port is ${process.env.PORT}`);
 
 })
 
-module.exports = { server, io, app,sendNotification }
+module.exports = { server, io, app, sendNotification }
