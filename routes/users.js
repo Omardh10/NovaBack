@@ -12,7 +12,7 @@ const { RemoveImage, UploadImage, RemoveImagemany } = require('../utils/cloudina
 const { Post } = require('../models/Post');
 const { Comment } = require('../models/Comment');
 const nodemailer = require('nodemailer');
-const { sendNotification } = require('../socket/socketio');
+const { SendNotification } = require('../socket/socket');
 
 const generateactivecode = () => {
     return Math.floor(100000 + Math.random() * 900000)
@@ -191,11 +191,11 @@ router.patch('/follow/:id', verifytoken, asynchandler(async (req, res) => {
     }
     const updatedUserToFollow = await User.findById(req.params.id);
     const updatedCurrentUser = await User.findById(req.user.id);
-    //  sendNotification(userToFollow, 'you have a new follow', {
-    //                     userToFollow,
-    //                     currentUser,
-    //                     type: 'new_follow'
-    //                 });
+     SendNotification(userToFollow, 'you have a new follow', {
+                        userToFollow,
+                        currentUser,
+                        type: 'new_follow'
+                    });
     res.status(200).json({
         status: "success",
         data: {
@@ -229,3 +229,4 @@ router.get('/checkemail', asynchandler(async (req, res) => {
 }))
 
 module.exports = router;
+

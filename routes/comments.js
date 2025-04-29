@@ -4,6 +4,8 @@ const { verifytoken } = require('../meddlwer/verifyalltoken');
 const { validatcreateComment, Comment, validatupdateComment } = require('../models/Comment');
 const { User } = require('../models/User');
 const { Post } = require('../models/Post');
+const { SendNotification } = require('../socket/socket');
+
 const router = express.Router();
 
 router.get('/', asynchandler(async (req, res) => {
@@ -35,7 +37,7 @@ router.post('/', verifytoken, asynchandler(async (req, res) => {
    await newcomment.save();
    const post = await Post.findById(req.body.postId);
    if (post.user.toString() !== req.user.id) {
-       sendNotification(post.user.toString(), 'New comment on your post', {
+       SendNotification(post.user.toString(), 'New comment on your post', {
            postId: post._id,
            commentId: newcomment._id,
            userId: req.user.id,

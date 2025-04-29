@@ -8,10 +8,8 @@ const fs = require('fs');
 const path = require('path');
 const { Comment } = require('../models/Comment');
 const { User } = require('../models/User');
-const { sendNotification } = require('../socket/socketio');
-
+const { SendNotification } = require('../socket/socket');
 const router = express.Router();
-
 
 router.get('/', asynchandler(async (req, res) => {
     const post_item = 1;
@@ -161,7 +159,7 @@ router.patch('/like/:id', verifytoken, asynchandler(async (req, res) => {
             }, { new: true })
 
             if (post.user.toString() !== req.user.id) {
-                sendNotification(post.user, 'New like on your post', {
+                SendNotification(post.user, 'New like on your post', {
                     postId: post._id,
                     userId: req.user.id,
                     type: 'new_like'
