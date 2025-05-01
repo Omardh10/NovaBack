@@ -9,6 +9,7 @@ const path = require('path');
 const { Comment } = require('../models/Comment');
 const { User } = require('../models/User');
 const { SendNotification } = require('../socket/socket');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 router.get('/', asynchandler(async (req, res) => {
@@ -16,7 +17,7 @@ router.get('/', asynchandler(async (req, res) => {
     const { pagenumber, category } = req.query;
     let posts;
     if (pagenumber) {
-        posts = await Post.find().skip((pagenumber - 1) * post_item).limit(post_item).populate("user", ["-password"]).populate("comments").sort({creadetAt:-1})
+        posts = await Post.find().skip((pagenumber - 1) * post_item).limit(post_item).populate("user", ["-password"]).populate("comments").sort({ creadetAt: -1 })
         res.status(201).json({ posts });
     }
     if (category) {
@@ -28,6 +29,20 @@ router.get('/', asynchandler(async (req, res) => {
         posts = await Post.find().populate("user", ["-password"]).populate("comments");
         res.status(201).json({ posts });
     }
+}))
+
+router.post('/verify-token', asynchandler(async (req, res) => {
+    const { token } = req.body;
+    if (!token) {
+        return res.status(404).json({ message: "token not provided" });
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_KEY)
+        req.user = decoded;
+    } catch (error) {
+        res.status(500).json({ message: "invalid token" })
+    }
+    res.status(200).json({ message: " token is right " })
 }))
 
 router.get('/:id', asynchandler(async (req, res) => {
@@ -64,9 +79,9 @@ router.post('/', verifytoken, uploadphoto.single('image'), asynchandler(async (r
     newpost.save();
     const user = await User.findById(req.user.id);
     const followers = user.followers; // افترض أن لديك حقل followers في نموذج User
-    
+
     followers.forEach(followerId => {
-       SendNotification(followerId, 'New post from user you follow', {
+        SendNotification(followerId, 'New post from user you follow', {
             postId: newpost._id,
             userId: req.user.id,
             type: 'new_post'
@@ -158,13 +173,13 @@ router.patch('/like/:id', verifytoken, asynchandler(async (req, res) => {
                 }
             }, { new: true })
 
-            if (post.user.toString() !== req.user.id) {
-                SendNotification(post.user, 'New like on your post', {
-                    postId: post._id,
-                    userId: req.user.id,
-                    type: 'new_like'
-                });
-            }
+        if (post.user.toString() !== req.user.id) {
+            SendNotification(post.user, 'New like on your post', {
+                postId: post._id,
+                userId: req.user.id,
+                type: 'new_like'
+            });
+        }
 
     }
     res.status(201).json(post)

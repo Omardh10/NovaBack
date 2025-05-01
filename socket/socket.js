@@ -14,7 +14,7 @@ const users = {};
 
 const SendNotification = (userId, message, data) => {
     if (users[userId]) {
-        return io.to(users[userId].socketId).emit('notification', {
+        io.to(users[userId]).emit('notification', { // استخدام users[userId] مباشرةً
             message,
             data,
             timestamp: new Date()
@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
 
 
 
-    socket.on('diconnect', () => {
+    socket.on('disconnect', () => {
         console.log('user disconnected');
         delete users[userId]
         io.emit('GetOnlineUsers', Object.keys(users));
