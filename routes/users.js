@@ -188,14 +188,15 @@ router.patch('/follow/:id', verifytoken, asynchandler(async (req, res) => {
                 $addToSet: { followers: req.params.id }
             },{new:true});
         }
+        SendNotification(req.params.id, 'you have a new follow', {
+            userToFollow,
+            currentUser,
+            type: 'new_follow'
+        });
     }
     const updatedUserToFollow = await User.findById(req.params.id);
     const updatedCurrentUser = await User.findById(req.user.id);
-     SendNotification(userToFollow, 'you have a new follow', {
-                        userToFollow,
-                        currentUser,
-                        type: 'new_follow'
-                    });
+     
     res.status(200).json({
         status: "success",
         data: {
