@@ -9,10 +9,11 @@ const categroute = require("./routes/categories");
 const routpasswod = require('./routes/password');
 const { ConnectToDb } = require('./utils/db');
 const { server, app } = require('./socket/socket');
-
+const cors = require('cors')
 dotenv.config();
 app.use(express.json());
 ConnectToDb();
+app.use(cors())
 
 app.use('/api/users', userroute)
 app.use('/api/posts', postroute)
