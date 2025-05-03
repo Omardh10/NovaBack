@@ -1,4 +1,4 @@
-const express=require("express");
+const express = require("express");
 const app = express();
 const { Server } = require('socket.io');
 const http = require('http');
@@ -14,7 +14,7 @@ const users = {};
 app.use(cors())
 const SendNotification = (userId, message, data) => {
     if (users[userId]) {
-        io.to(users[userId]).emit('notification', { // استخدام users[userId] مباشرةً
+        io.to(users[userId]).emit('notification', {
             message,
             data,
             timestamp: new Date()
@@ -36,4 +36,4 @@ io.on('connection', (socket) => {
         io.emit('GetOnlineUsers', Object.keys(users));
     })
 })
-module.exports = { io, server, SendNotification,app };
+module.exports = { io, server, SendNotification, app };

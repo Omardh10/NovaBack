@@ -57,3 +57,9 @@
     after that i written .skip(skip).limit(limit).populate("user",["-password"]);
     */
 
+   /* const generateactivecode = () => {
+    return Math.floor(100000 + Math.random() * 900000)
+}*/
+
+/*const activcode = generateactivecode();*/
+

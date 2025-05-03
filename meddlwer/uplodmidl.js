@@ -27,7 +27,7 @@ const uploadphoto = multer({
     },
     limits: { fileSize: 1024 * 1024 }
 })
-module.exports={
+module.exports = {
     photoStorage,
     uploadphoto
 }
