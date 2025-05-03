@@ -5,7 +5,6 @@ const postroute = require('./routes/posts');
 const dotenv = require('dotenv');
 const commentroutes = require('./routes/comments');
 const userroute = require('./routes/users');
-const categroute = require("./routes/categories");
 const routpasswod = require('./routes/password');
 const { ConnectToDb } = require('./utils/db');
 const { server, app } = require('./socket/socket');
@@ -18,7 +17,6 @@ app.use(cors())
 app.use('/api/users', userroute)
 app.use('/api/posts', postroute)
 app.use('/api/comments', commentroutes)
-app.use('/api/categories', categroute)
 app.use('/api/password', routpasswod)
 
 
