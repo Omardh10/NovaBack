@@ -229,6 +229,8 @@ const CheckEmailUser = asynchandler(async (req, res) => {
     }
 })
 
+
+
 module.exports = {
     RegisterUser,
     GetUsers,
@@ -238,5 +240,6 @@ module.exports = {
     DeleteUser,
     PostImageUser,
     FollowUser,
-    CheckEmailUser
+    CheckEmailUser,
+   
 }

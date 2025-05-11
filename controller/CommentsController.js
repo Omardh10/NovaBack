@@ -15,8 +15,8 @@ const NewComment = asynchandler(async (req, res) => {
         postId: req.body.postId,
         text: req.body.text,
         user: req.user.id,
-        username: getusername.username,
-        profilephoto: getusername.profilephoto.url
+        /* username: getusername.username,
+         profilephoto: getusername.profilephoto.url*/
     })
     await newcomment.save();
     const post = await Post.findById(req.body.postId);
@@ -32,13 +32,13 @@ const NewComment = asynchandler(async (req, res) => {
 })
 
 const GetAllComments = asynchandler(async (req, res) => {
-    const comments = await Comment.find()
+    const comments = await Comment.find().populate('user', ["username", "profilephoto"])
     // .populate("user", ["-password"])
     res.status(200).json({ status: "success", comments })
 })
 
 const GetSingleComment = asynchandler(async (req, res) => {
-    const comment = await Comment.findById(req.params.id)
+    const comment = await Comment.findById(req.params.id).populate('user', ["username", "profilephoto"])
     if (!comment) {
         return res.status(404).json({ message: "comment not found" })
     }

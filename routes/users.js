@@ -9,16 +9,16 @@ const { uploadphoto } = require('../meddlwer/uplodmidl');
 router.get('/profile', verifytokenandisAdmin, GetUsers)
 
 // Get Single User
-router.get('/profile/:id',GetUser)
+router.get('/profile/:id', GetUser)
 
 // Register New User
 router.post('/register', RegisterUser)
 
 // Login Old User
-router.post('/login',LoginUser)
+router.post('/login', LoginUser)
 
 // Update User
-router.patch('/profile/:id', verifytokenandonlyuser,UpdateUser)
+router.patch('/profile/:id', verifytokenandonlyuser, UpdateUser)
 
 // Delete User
 router.delete('/profile/:id', verifytokenandauthorization, DeleteUser)
@@ -31,6 +31,7 @@ router.patch('/follow/:id', verifytoken, FollowUser)
 
 // Check Email User
 router.get('/checkemail', CheckEmailUser)
+
 
 
 

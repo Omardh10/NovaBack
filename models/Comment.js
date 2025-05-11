@@ -10,21 +10,22 @@ const Commentschema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        index: true  
     },
     postId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Post',
         required: true
-    },
-    username: {
-        type: String,
-        required: true
-    },
-    profilephoto: {
-        type: String,
-        required: true
-    },
+    }
+    // username: {
+    //     type: String,
+    //     required: true
+    // },
+    // profilephoto: {
+    //     type: String,
+    //     required: true
+    // },
 }, { timestamps: true });
 const Comment = mongoose.model("Comment", Commentschema)
 
